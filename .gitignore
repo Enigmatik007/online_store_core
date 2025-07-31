@@ -1,5 +1,33 @@
-﻿.venv/
+﻿# Poetry и Python
+.venv/
+venv/
+env/
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
 .pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# IDE (PyCharm, VSCode)
+.idea/
+.vscode/
+*.iml
 *.swp
+*.swo
+.DS_Store
+
+# Логи и специфичные файлы
+logs/
+*.log
+*.sqlite3
+.env
+.env.local
+.env.*.local
+
+# Poetry
+poetry.lock
