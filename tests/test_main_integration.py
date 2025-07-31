@@ -1,6 +1,6 @@
-from pathlib import Path
-import sys
 import subprocess
+import sys
+from pathlib import Path
 
 
 def test_run_main_py_as_script() -> None:

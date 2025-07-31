@@ -1,8 +1,9 @@
 import sys
+import traceback
 from pathlib import Path
+
 from src.models import Category
 from src.utils import load_data_from_json
-import traceback
 
 
 def main(json_path: Path | None = None) -> int:

@@ -1,6 +1,7 @@
 import pytest
-from src.models import Category, Product
+
 import src.main
+from src.models import Category, Product
 
 
 def test_main_runs_without_errors(monkeypatch: pytest.MonkeyPatch) -> None:

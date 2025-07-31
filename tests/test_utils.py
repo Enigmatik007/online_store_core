@@ -1,5 +1,6 @@
-from pathlib import Path
 import json
+from pathlib import Path
+
 from src.utils import load_data_from_json
 
 
