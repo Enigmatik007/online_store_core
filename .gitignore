@@ -21,6 +21,10 @@ htmlcov/
 *.swo
 .DS_Store
 
+# Данные (игнорируем все JSON, кроме примеров)
+data/*.json
+!data/example.json
+
 # Логи и специфичные файлы
 logs/
 *.log
@@ -31,3 +35,7 @@ logs/
 
 # Poetry
 poetry.lock
+
+# Системные файлы
+Thumbs.db
+Desktop.ini
