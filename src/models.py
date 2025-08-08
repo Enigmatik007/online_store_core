@@ -1,65 +1,155 @@
+"""Модуль моделей для работы с товарами и категориями."""
+
 import json
-from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Dict, Any
 
 
-@dataclass
 class Product:
-    """Класс для представления товара в магазине.
+    """Класс для представления товара в магазине."""
 
-    Attributes:
-        name: Название товара
-        description: Описание товара
-        price: Цена товара
-        quantity: Количество в наличии
-    """
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        """Инициализирует товар.
 
-    name: str
-    description: str
-    price: float
-    quantity: int
-
-    def __post_init__(self) -> None:
-        """Проводит валидацию данных при инициализации объекта.
+        Args:
+            name: Название товара
+            description: Описание товара
+            price: Цена товара
+            quantity: Количество товара
 
         Raises:
-            ValueError: Если цена или количество недопустимы
+            ValueError: При некорректных цене или количестве
         """
-        if self.price <= 0:
+        self._name = name
+        self._description = description
+        self._quantity = int(quantity)
+        self._price = float(price)
+
+        if self._price <= 0:
             raise ValueError("Цена должна быть положительной")
-        if self.quantity < 0:
+        if self._quantity < 0:
             raise ValueError("Количество не может быть отрицательным")
+
+    @property
+    def name(self) -> str:
+        """Возвращает название товара."""
+        return self._name
+
+    @property
+    def description(self) -> str:
+        """Возвращает описание товара."""
+        return self._description
+
+    @property
+    def price(self) -> float:
+        """Возвращает цену товара."""
+        return self._price
+
+    @price.setter
+    def price(self, value: float) -> None:
+        """Устанавливает цену с проверкой.
+
+        Args:
+            value: Новая цена
+
+        Note:
+            При снижении цены требует подтверждения
+        """
+        value = float(value)
+        if value <= 0:
+            print("Цена не должна быть нулeвая или отрицательная")
+            return
+
+        if value < self._price:
+            confirm = input("Подтвердите снижение цены (y/n): ").strip().lower()
+            if confirm == "y":
+                self._price = value
+        else:
+            self._price = value
+
+    @property
+    def quantity(self) -> int:
+        """Возвращает количество товара."""
+        return self._quantity
+
+    @quantity.setter
+    def quantity(self, value: int) -> None:
+        """Устанавливает количество товара.
+
+        Args:
+            value: Новое количество
+        """
+        self._quantity = int(value)
+
+    def __repr__(self) -> str:
+        """Возвращает строковое представление товара."""
+        return (
+            f"Product(name={self._name!r}, description={self._description!r}, "
+            f"price={self._price!r}, quantity={self._quantity!r})"
+        )
+
+    @classmethod
+    def new_product(
+        cls, data: Dict[str, Any], existing_products: Optional[List['Product']] = None
+    ) -> 'Product':
+        """Создает новый товар или обновляет существующий.
+
+        Args:
+            data: Данные нового товара
+            existing_products: Список существующих товаров
+
+        Returns:
+            Созданный или обновленный товар
+
+        Raises:
+            ValueError: При отсутствии обязательных полей
+        """
+        required = ("name", "description", "price", "quantity")
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise ValueError(f"Отсутствуют обязательные поля: {missing}")
+
+        name = data["name"]
+        description = data["description"]
+        price = float(data["price"])
+        quantity = int(data["quantity"])
+
+        if existing_products:
+            for existing in existing_products:
+                if existing.name == name:
+                    existing.quantity += quantity
+                    if price > existing.price:
+                        existing.price = price
+                    return existing
+
+        return cls(name=name, description=description, price=price, quantity=quantity)
 
 
 class Category:
-    """Класс для представления категории товаров.
+    """Класс для представления категории товаров."""
 
-    Attributes:
-        name: Название категории
-        description: Описание категории
-        total_categories: Счетчик всех категорий
-        total_products: Счетчик всех товаров
-    """
+    total_categories = 0
+    total_products = 0
 
-    total_categories: int = 0
-    total_products: int = 0
+    def __init__(
+        self, name: str, description: str, products: Optional[List[Product]] = None
+    ):
+        """Инициализирует категорию.
 
-    def __init__(self, name: str, description: str, products: List[Product]) -> None:
-        """Инициализирует категорию с товарами."""
+        Args:
+            name: Название категории
+            description: Описание категории
+            products: Список товаров
+        """
         self.name = name
         self.description = description
-        self.__products = products
+        self.__products = list(products) if products else []
         Category.total_categories += 1
-        Category.total_products += len(products)
+        Category.total_products += len(self.__products)
 
     @property
     def products(self) -> str:
-        """Возвращает форматированную строку со всеми товарами.
-
-        Returns:
-            Строка с информацией о товарах
-        """
+        """Возвращает строку с товарами категории."""
         return "\n".join(
             f"{p.name}, {p.price} руб. Остаток: {p.quantity} шт."
             for p in self.__products
@@ -67,7 +157,7 @@ class Category:
 
     @property
     def product_list(self) -> List[Product]:
-        """Возвращает список объектов товаров."""
+        """Возвращает список товаров категории."""
         return self.__products
 
     def add_product(self, product: Product) -> None:
@@ -92,7 +182,7 @@ class Category:
             file_path: Путь к JSON-файлу
 
         Returns:
-            Созданный объект Category
+            Созданная категория
         """
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
