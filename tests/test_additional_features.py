@@ -40,7 +40,7 @@ def test_product_price_setter_validation_and_interactive(
     prod.price = 0
     assert prod.price == 100.0
     out = capsys.readouterr().out
-    assert "Цена не должна быть нулевая или отрицательная" in out
+    assert "Цена не должна быть нулeвая или отрицательная" in out
 
     # Снижение цены с подтверждением "y"
     monkeypatch.setattr("builtins.input", lambda prompt=None: "y")
