@@ -23,9 +23,9 @@ class Product:
         self._name = name
         self._description = description
         self._quantity = int(quantity)
-        self._price = float(price)
+        self.__price = float(price)  # По-настоящему приватный атрибут
 
-        if self._price <= 0:
+        if self.__price <= 0:
             raise ValueError("Цена должна быть положительной")
         if self._quantity < 0:
             raise ValueError("Количество не может быть отрицательным")
@@ -43,7 +43,7 @@ class Product:
     @property
     def price(self) -> float:
         """Возвращает цену товара."""
-        return self._price
+        return self.__price
 
     @price.setter
     def price(self, value: float) -> None:
@@ -57,15 +57,15 @@ class Product:
         """
         value = float(value)
         if value <= 0:
-            print("Цена не должна быть нулeвая или отрицательная")
+            print("Цена не должна быть нулевая или отрицательная")
             return
 
-        if value < self._price:
+        if value < self.__price:
             confirm = input("Подтвердите снижение цены (y/n): ").strip().lower()
             if confirm == "y":
-                self._price = value
+                self.__price = value
         else:
-            self._price = value
+            self.__price = value
 
     @property
     def quantity(self) -> int:
@@ -85,7 +85,7 @@ class Product:
         """Возвращает строковое представление товара."""
         return (
             f"Product(name={self._name!r}, description={self._description!r}, "
-            f"price={self._price!r}, quantity={self._quantity!r})"
+            f"price={self.__price!r}, quantity={self._quantity!r})"
         )
 
     @classmethod
@@ -99,7 +99,7 @@ class Product:
             existing_products: Список существующих товаров
 
         Returns:
-            Созданный или обновленный товар
+            Созданный или обновлённый товар
 
         Raises:
             ValueError: При отсутствии обязательных полей
@@ -167,10 +167,10 @@ class Category:
             product: Товар для добавления
 
         Raises:
-            TypeError: Если передан не объект Product
+            TypeError: Если передан не объект Product или его наследник
         """
-        if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product")
+        if not isinstance(product, Product):  # Явная проверка типа
+            raise TypeError("Добавлять можно только Product и наследников")
         self.__products.append(product)
         Category.total_products += 1
 

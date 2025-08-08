@@ -36,6 +36,16 @@ class TestProduct:
         with pytest.raises(expected):
             Product(name="Test", description="Test", price=price, quantity=quantity)
 
+    def test_price_setter_validation(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """Тестирует валидацию при установке цены."""
+        product = Product(name="Test", description="Test", price=100.0, quantity=10)
+
+        # Попытка установить недопустимую цену
+        product.price = -50
+        assert product.price == 100.0  # Цена не изменилась
+        captured = capsys.readouterr()
+        assert "Цена не должна быть нулевая или отрицательная" in captured.out
+
 
 class TestCategory:
     """Тесты для класса Category."""
@@ -56,7 +66,6 @@ class TestCategory:
     def test_add_product_typeerror(self, sample_category: Category) -> None:
         """Тестирует добавление в категорию не Product вызывает TypeError."""
         with pytest.raises(TypeError):
-            # Явно указываем mypy, что это тест на неправильный тип аргумента
             sample_category.add_product("не продукт")  # type: ignore[arg-type]
 
     def test_from_json(self, json_data_file: Path) -> None:
