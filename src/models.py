@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Iterator
 
 
 class Product:
@@ -23,12 +23,34 @@ class Product:
         self._name = name
         self._description = description
         self._quantity = int(quantity)
-        self.__price = float(price)  # По-настоящему приватный атрибут
+        self.__price = float(price)
 
         if self.__price <= 0:
             raise ValueError("Цена должна быть положительной")
         if self._quantity < 0:
             raise ValueError("Количество не может быть отрицательным")
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление товара в формате:
+        'Название, X руб. Остаток: X шт.'
+        """
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: 'Product') -> float:
+        """Складывает продукты по формуле: цена * количество.
+
+        Args:
+            other: Другой продукт для сложения
+
+        Returns:
+            Сумма произведений цены на количество для обоих продуктов
+
+        Raises:
+            TypeError: Если other не является Product
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты Product")
+        return (self.price * self.quantity) + (other.price * other.quantity)
 
     @property
     def name(self) -> str:
@@ -147,13 +169,21 @@ class Category:
         Category.total_categories += 1
         Category.total_products += len(self.__products)
 
+    def __str__(self) -> str:
+        """Возвращает строковое представление категории в формате:
+        'Название категории, количество продуктов: X шт.'
+        """
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def __iter__(self) -> Iterator[Product]:
+        """Возвращает итератор по товарам категории."""
+        return CategoryIterator(self)
+
     @property
     def products(self) -> str:
         """Возвращает строку с товарами категории."""
-        return "\n".join(
-            f"{p.name}, {p.price} руб. Остаток: {p.quantity} шт."
-            for p in self.__products
-        )
+        return "\n".join(str(p) for p in self.__products)
 
     @property
     def product_list(self) -> List[Product]:
@@ -169,7 +199,7 @@ class Category:
         Raises:
             TypeError: Если передан не объект Product или его наследник
         """
-        if not isinstance(product, Product):  # Явная проверка типа
+        if not isinstance(product, Product):
             raise TypeError("Добавлять можно только Product и наследников")
         self.__products.append(product)
         Category.total_products += 1
@@ -200,3 +230,32 @@ class Category:
         return cls(
             name=data['name'], description=data['description'], products=products
         )
+
+
+class CategoryIterator:
+    """Итератор по товарам категории."""
+
+    def __init__(self, category: Category) -> None:
+        """Инициализирует итератор.
+
+        Args:
+            category: Категория для итерации
+        """
+        self._category = category
+        self._index = 0
+
+    def __iter__(self) -> 'CategoryIterator':
+        """Возвращает сам итератор."""
+        return self
+
+    def __next__(self) -> Product:
+        """Возвращает следующий товар в категории.
+
+        Raises:
+            StopIteration: Когда товары закончились
+        """
+        if self._index < len(self._category.product_list):
+            product = self._category.product_list[self._index]
+            self._index += 1
+            return product
+        raise StopIteration

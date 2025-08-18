@@ -46,6 +46,23 @@ class TestProduct:
         captured = capsys.readouterr()
         assert "Цена не должна быть нулевая или отрицательная" in captured.out
 
+    def test_product_str(self) -> None:
+        """Тестирует строковое представление продукта."""
+        product = Product(name="Test", description="Test", price=100.0, quantity=5)
+        assert str(product) == "Test, 100.0 руб. Остаток: 5 шт."
+
+    def test_product_addition(self) -> None:
+        """Тестирует сложение продуктов."""
+        p1 = Product(name="A", description="", price=100, quantity=2)
+        p2 = Product(name="B", description="", price=200, quantity=3)
+        assert p1 + p2 == 100 * 2 + 200 * 3
+
+    def test_product_addition_type_error(self) -> None:
+        """Тестирует TypeError при сложении с не-Product."""
+        p = Product(name="A", description="", price=100, quantity=1)
+        with pytest.raises(TypeError):
+            p + "invalid"  # type: ignore[operator]
+
 
 class TestCategory:
     """Тесты для класса Category."""
@@ -73,3 +90,13 @@ class TestCategory:
         category = Category.from_json(json_data_file)
         assert category.name == "Test Category"
         assert "Test Product" in category.products
+
+    def test_category_str(self, sample_category: Category) -> None:
+        """Тестирует строковое представление категории."""
+        assert str(sample_category) == "Test Category, количество продуктов: 10 шт."
+
+    def test_category_iterator(self, sample_category: Category) -> None:
+        """Тестирует итерацию по категории."""
+        products = list(sample_category)
+        assert len(products) == 1
+        assert products[0].name == "Test Product"
