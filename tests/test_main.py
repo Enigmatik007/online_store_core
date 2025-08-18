@@ -1,7 +1,8 @@
 import pytest
+from unittest.mock import patch
 
-import src.main
 from src.models import Category, Product
+from src.main import main
 
 
 def test_main_runs_without_errors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -12,8 +13,11 @@ def test_main_runs_without_errors(monkeypatch: pytest.MonkeyPatch) -> None:
         category = Category("TestCat", "Desc", [product])
         return [category]
 
-    monkeypatch.setattr("src.main.load_data_from_json", mock_load_data)
-    src.main.main()
+    # Мокаем аргументы командной строки
+    with patch('sys.argv', ['main.py', 'data/example.json']):
+        monkeypatch.setattr("src.main.load_data_from_json", mock_load_data)
+        exit_code = main()
+        assert exit_code == 0
 
 
 def test_main_handles_exception(
@@ -24,8 +28,10 @@ def test_main_handles_exception(
     def mock_load_data_fail(file_path: str) -> None:
         raise RuntimeError("fail")
 
-    monkeypatch.setattr("src.main.load_data_from_json", mock_load_data_fail)
-    src.main.main()
-
-    captured = capsys.readouterr()
-    assert "Ошибка: fail" in captured.out
+    # Мокаем аргументы командной строки
+    with patch('sys.argv', ['main.py', 'data/example.json']):
+        monkeypatch.setattr("src.main.load_data_from_json", mock_load_data_fail)
+        exit_code = main()
+        captured = capsys.readouterr()
+        assert "Ошибка: fail" in captured.out
+        assert exit_code == 1
