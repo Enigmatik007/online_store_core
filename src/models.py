@@ -197,10 +197,10 @@ class Category:
             product: Товар для добавления
 
         Raises:
-            TypeError: Если передан не объект Product или его наследник
+            TypeError: Если передан не Product или его наследник
         """
         if not isinstance(product, Product):
-            raise TypeError("Добавлять можно только Product и наследников")
+            raise TypeError("Можно добавлять только Product или его наследников")
         self.__products.append(product)
         Category.total_products += 1
 
@@ -259,3 +259,85 @@ class CategoryIterator:
             self._index += 1
             return product
         raise StopIteration
+
+
+class Smartphone(Product):
+    """Класс для представления смартфонов."""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: float,
+        model: str,
+        memory: int,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление смартфона."""
+        price_str = f"{self.price:.0f}" if self.price.is_integer() else f"{self.price}"
+        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: Product) -> float:
+        """Складывает смартфоны по формуле: цена * количество.
+
+        Args:
+            other: Другой продукт для сложения
+
+        Returns:
+            Сумма произведений цены на количество
+
+        Raises:
+            TypeError: Если other не является Smartphone
+        """
+        if not isinstance(other, Smartphone):
+            raise TypeError("Можно складывать только объекты Smartphone")
+        return super().__add__(other)
+
+
+class LawnGrass(Product):
+    """Класс для представления газонной травы."""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: int,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление газонной травы."""
+        price_str = f"{self.price:.0f}" if self.price.is_integer() else f"{self.price}"
+        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: Product) -> float:
+        """Складывает газонную траву по формуле: цена * количество.
+
+        Args:
+            other: Другой продукт для сложения
+
+        Returns:
+            Сумма произведений цены на количество
+
+        Raises:
+            TypeError: Если other не является LawnGrass
+        """
+        if not isinstance(other, LawnGrass):
+            raise TypeError("Можно складывать только объекты LawnGrass")
+        return super().__add__(other)
