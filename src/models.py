@@ -9,17 +9,7 @@ class Product:
     """Класс для представления товара в магазине."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
-        """Инициализирует товар.
-
-        Args:
-            name: Название товара
-            description: Описание товара
-            price: Цена товара
-            quantity: Количество товара
-
-        Raises:
-            ValueError: При некорректных цене или количестве
-        """
+        """Инициализирует товар."""
         self._name = name
         self._description = description
         self._quantity = int(quantity)
@@ -31,24 +21,12 @@ class Product:
             raise ValueError("Количество не может быть отрицательным")
 
     def __str__(self) -> str:
-        """Возвращает строковое представление товара в формате:
-        'Название, X руб. Остаток: X шт.'
-        """
+        """Возвращает строковое представление товара."""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other: 'Product') -> float:
-        """Складывает продукты по формуле: цена * количество.
-
-        Args:
-            other: Другой продукт для сложения
-
-        Returns:
-            Сумма произведений цены на количество для обоих продуктов
-
-        Raises:
-            TypeError: Если other не является Product
-        """
-        if not isinstance(other, Product):
+        """Складывает продукты по формуле: цена * количество."""
+        if type(other) is not Product:
             raise TypeError("Можно складывать только объекты Product")
         return (self.price * self.quantity) + (other.price * other.quantity)
 
@@ -69,14 +47,7 @@ class Product:
 
     @price.setter
     def price(self, value: float) -> None:
-        """Устанавливает цену с проверкой.
-
-        Args:
-            value: Новая цена
-
-        Note:
-            При снижении цены требует подтверждения
-        """
+        """Устанавливает цену с проверкой."""
         value = float(value)
         if value <= 0:
             print("Цена не должна быть нулевая или отрицательная")
@@ -96,11 +67,7 @@ class Product:
 
     @quantity.setter
     def quantity(self, value: int) -> None:
-        """Устанавливает количество товара.
-
-        Args:
-            value: Новое количество
-        """
+        """Устанавливает количество товара."""
         self._quantity = int(value)
 
     def __repr__(self) -> str:
@@ -114,18 +81,7 @@ class Product:
     def new_product(
         cls, data: Dict[str, Any], existing_products: Optional[List['Product']] = None
     ) -> 'Product':
-        """Создает новый товар или обновляет существующий.
-
-        Args:
-            data: Данные нового товара
-            existing_products: Список существующих товаров
-
-        Returns:
-            Созданный или обновлённый товар
-
-        Raises:
-            ValueError: При отсутствии обязательных полей
-        """
+        """Создает новый товар или обновляет существующий."""
         required = ("name", "description", "price", "quantity")
         missing = [k for k in required if k not in data]
         if missing:
@@ -156,13 +112,7 @@ class Category:
     def __init__(
         self, name: str, description: str, products: Optional[List[Product]] = None
     ):
-        """Инициализирует категорию.
-
-        Args:
-            name: Название категории
-            description: Описание категории
-            products: Список товаров
-        """
+        """Инициализирует категорию."""
         self.name = name
         self.description = description
         self.__products = list(products) if products else []
@@ -170,9 +120,7 @@ class Category:
         Category.total_products += len(self.__products)
 
     def __str__(self) -> str:
-        """Возвращает строковое представление категории в формате:
-        'Название категории, количество продуктов: X шт.'
-        """
+        """Возвращает строковое представление категории."""
         total_quantity = sum(product.quantity for product in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
@@ -191,14 +139,7 @@ class Category:
         return self.__products
 
     def add_product(self, product: Product) -> None:
-        """Добавляет товар в категорию.
-
-        Args:
-            product: Товар для добавления
-
-        Raises:
-            TypeError: Если передан не Product или его наследник
-        """
+        """Добавляет товар в категорию."""
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только Product или его наследников")
         self.__products.append(product)
@@ -206,14 +147,7 @@ class Category:
 
     @classmethod
     def from_json(cls, file_path: Path) -> 'Category':
-        """Создает категорию из JSON-файла.
-
-        Args:
-            file_path: Путь к JSON-файлу
-
-        Returns:
-            Созданная категория
-        """
+        """Создает категорию из JSON-файла."""
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
@@ -236,11 +170,7 @@ class CategoryIterator:
     """Итератор по товарам категории."""
 
     def __init__(self, category: Category) -> None:
-        """Инициализирует итератор.
-
-        Args:
-            category: Категория для итерации
-        """
+        """Инициализирует итератор."""
         self._category = category
         self._index = 0
 
@@ -249,11 +179,7 @@ class CategoryIterator:
         return self
 
     def __next__(self) -> Product:
-        """Возвращает следующий товар в категории.
-
-        Raises:
-            StopIteration: Когда товары закончились
-        """
+        """Возвращает следующий товар в категории."""
         if self._index < len(self._category.product_list):
             product = self._category.product_list[self._index]
             self._index += 1
@@ -275,6 +201,7 @@ class Smartphone(Product):
         memory: int,
         color: str,
     ):
+        """Инициализирует смартфон."""
         super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
@@ -287,20 +214,10 @@ class Smartphone(Product):
         return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other: Product) -> float:
-        """Складывает смартфоны по формуле: цена * количество.
-
-        Args:
-            other: Другой продукт для сложения
-
-        Returns:
-            Сумма произведений цены на количество
-
-        Raises:
-            TypeError: Если other не является Smartphone
-        """
-        if not isinstance(other, Smartphone):
+        """Складывает смартфоны по формуле: цена * количество."""
+        if type(other) is not Smartphone:
             raise TypeError("Можно складывать только объекты Smartphone")
-        return super().__add__(other)
+        return (self.price * self.quantity) + (other.price * other.quantity)
 
 
 class LawnGrass(Product):
@@ -316,6 +233,7 @@ class LawnGrass(Product):
         germination_period: int,
         color: str,
     ):
+        """Инициализирует газонную траву."""
         super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
@@ -327,17 +245,7 @@ class LawnGrass(Product):
         return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other: Product) -> float:
-        """Складывает газонную траву по формуле: цена * количество.
-
-        Args:
-            other: Другой продукт для сложения
-
-        Returns:
-            Сумма произведений цены на количество
-
-        Raises:
-            TypeError: Если other не является LawnGrass
-        """
-        if not isinstance(other, LawnGrass):
+        """Складывает газонную траву по формуле: цена * количество."""
+        if type(other) is not LawnGrass:
             raise TypeError("Можно складывать только объекты LawnGrass")
-        return super().__add__(other)
+        return (self.price * self.quantity) + (other.price * other.quantity)
