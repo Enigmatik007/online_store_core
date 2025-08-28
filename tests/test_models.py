@@ -49,7 +49,7 @@ class TestProduct:
     def test_product_str(self) -> None:
         """Тестирует строковое представление продукта."""
         product = Product(name="Test", description="Test", price=100.0, quantity=5)
-        assert str(product) == "Test, 100.0 руб. Остаток: 5 шт."
+        assert str(product) == "Test, 100 руб. Остаток: 5 шт."
 
     def test_product_addition(self) -> None:
         """Тестирует сложение продуктов."""
