@@ -1,11 +1,86 @@
 """Модуль моделей для работы с товарами и категориями."""
 
 import json
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Iterator
 
 
-class Product:
+class ReprMixin:
+    """Миксин для логирования создания объектов."""
+
+    def __repr__(self) -> str:
+        """Возвращает строковое представление создания объекта."""
+        # Получаем только публичные атрибуты (без подчеркиваний в начале)
+        params = []
+        for attr_name in dir(self):
+            if not attr_name.startswith('_'):
+                attr_value = getattr(self, attr_name)
+                # Исключаем методы и callable объекты
+                if not callable(attr_value) and not attr_name.startswith('_'):
+                    params.append(f"{attr_name}={attr_value!r}")
+
+        return f"{self.__class__.__name__}({', '.join(params)})"
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для товаров."""
+
+    @abstractmethod
+    def __init__(
+        self, name: str, description: str, price: float, quantity: int
+    ) -> None:
+        """Абстрактный метод инициализации продукта."""
+        ...
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """Абстрактный метод строкового представления."""
+        ...
+
+    @abstractmethod
+    def __add__(self, other: 'BaseProduct') -> float:
+        """Абстрактный метод сложения продуктов."""
+        ...
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Абстрактное свойство имени."""
+        ...
+
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """Абстрактное свойство описания."""
+        ...
+
+    @property
+    @abstractmethod
+    def price(self) -> float:
+        """Абстрактное свойство цены."""
+        ...
+
+    @price.setter
+    @abstractmethod
+    def price(self, value: float) -> None:
+        """Абстрактный сеттер цены."""
+        ...
+
+    @property
+    @abstractmethod
+    def quantity(self) -> int:
+        """Абстрактное свойство количества."""
+        ...
+
+    @quantity.setter
+    @abstractmethod
+    def quantity(self, value: int) -> None:
+        """Абстрактный сеттер количества."""
+        ...
+
+
+class Product(BaseProduct, ReprMixin):
     """Класс для представления товара в магазине."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
@@ -20,14 +95,17 @@ class Product:
         if self._quantity < 0:
             raise ValueError("Количество не может быть отрицательным")
 
+        print(f"Создан объект: {repr(self)}")
+
     def __str__(self) -> str:
         """Возвращает строковое представление товара."""
-        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+        price_str = f"{self.price:.0f}" if self.price.is_integer() else f"{self.price}"
+        return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other: 'Product') -> float:
+    def __add__(self, other: 'BaseProduct') -> float:
         """Складывает продукты по формуле: цена * количество."""
-        if type(other) is not Product:
-            raise TypeError("Можно складывать только объекты Product")
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты Product и его наследников")
         return (self.price * self.quantity) + (other.price * other.quantity)
 
     @property
@@ -69,13 +147,6 @@ class Product:
     def quantity(self, value: int) -> None:
         """Устанавливает количество товара."""
         self._quantity = int(value)
-
-    def __repr__(self) -> str:
-        """Возвращает строковое представление товара."""
-        return (
-            f"Product(name={self._name!r}, description={self._description!r}, "
-            f"price={self.__price!r}, quantity={self._quantity!r})"
-        )
 
     @classmethod
     def new_product(
@@ -213,9 +284,9 @@ class Smartphone(Product):
         price_str = f"{self.price:.0f}" if self.price.is_integer() else f"{self.price}"
         return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other: Product) -> float:
+    def __add__(self, other: 'BaseProduct') -> float:
         """Складывает смартфоны по формуле: цена * количество."""
-        if type(other) is not Smartphone:
+        if not isinstance(other, Smartphone):
             raise TypeError("Можно складывать только объекты Smartphone")
         return (self.price * self.quantity) + (other.price * other.quantity)
 
@@ -244,8 +315,8 @@ class LawnGrass(Product):
         price_str = f"{self.price:.0f}" if self.price.is_integer() else f"{self.price}"
         return f"{self.name}, {price_str} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other: Product) -> float:
+    def __add__(self, other: 'BaseProduct') -> float:
         """Складывает газонную траву по формуле: цена * количество."""
-        if type(other) is not LawnGrass:
+        if not isinstance(other, LawnGrass):
             raise TypeError("Можно складывать только объекты LawnGrass")
         return (self.price * self.quantity) + (other.price * other.quantity)
