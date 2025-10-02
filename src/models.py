@@ -6,6 +6,12 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any, Iterator
 
 
+class ZeroQuantityError(Exception):
+    """Пользовательское исключение для товаров с нулевым количеством."""
+
+    pass
+
+
 class ReprMixin:
     """Миксин для логирования создания объектов."""
 
@@ -85,6 +91,19 @@ class Product(BaseProduct, ReprMixin):
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
         """Инициализирует товар."""
+        try:
+            if quantity == 0:
+                raise ZeroQuantityError(
+                    "Товар с нулевым количеством не может быть добавлен"
+                )
+        except ZeroQuantityError as e:
+            print(e)
+            raise
+        else:
+            print("Товар успешно добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
+
         self._name = name
         self._description = description
         self._quantity = int(quantity)
@@ -215,6 +234,18 @@ class Category:
             raise TypeError("Можно добавлять только Product или его наследников")
         self.__products.append(product)
         Category.total_products += 1
+
+    def average_price(self) -> float:
+        """Подсчитывает средний ценник всех товаров в категории.
+
+        Returns:
+            Средняя цена товаров в категории или 0, если товаров нет.
+        """
+        try:
+            total_price = sum(product.price for product in self.__products)
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            return 0
 
     @classmethod
     def from_json(cls, file_path: Path) -> 'Category':
